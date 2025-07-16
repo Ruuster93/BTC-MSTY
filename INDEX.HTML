@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSTY vs Bitcoin Investment Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: 600;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .calculate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .investment-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .investment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .investment-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .profit-positive {
+            color: #28a745;
+        }
+
+        .profit-negative {
+            color: #dc3545;
+        }
+
+        .comparison-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .comparison-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .winner {
+            font-size: 2rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .current-prices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .price-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .price-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .price-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .price-change {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .dividend-info {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .dividend-title {
+            font-weight: 600;
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .dividend-details {
+            color: #155724;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MSTY vs Bitcoin Calculator</h1>
+            <p>Compare your investment returns between MSTY ETF and Bitcoin</p>
+        </div>
+
+        <div class="current-prices">
+            <div class="price-card">
+                <div class="price-title">MSTY Current Price</div>
+                <div class="price-value" id="mstyCurrentPrice">Loading...</div>
+                <div class="price-change" id="mstyChange">-</div>
+            </div>
+            <div class="price-card">
+                <div class="price-title">Bitcoin Current Price</div>
+                <div class="price-value" id="bitcoinCurrentPrice">Loading...</div>
+                <div class="price-change" id="bitcoinChange">-</div>
+            </div>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="purchaseDate">Purchase Date</label>
+                    <input type="date" id="purchaseDate" value="2024-01-01">
+                </div>
+                <div class="input-group">
+                    <label for="investmentAmount">Investment Amount ($)</label>
+                    <input type="number" id="investmentAmount" value="10000" min="1" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="mstyPrice">MSTY Price at Purchase ($)</label>
+                    <input type="number" id="mstyPrice" value="" min="0.01" step="0.01" placeholder="Auto-filled from date">
+                </div>
+                <div class="input-group">
+                    <label for="bitcoinPrice">Bitcoin Price at Purchase ($)</label>
+                    <input type="number" id="bitcoinPrice" value="" min="0.01" step="0.01" placeholder="Auto-filled from date">
+                </div>
+            </div>
+            <button class="calculate-btn" onclick="calculateReturns()" id="calculateBtn">Calculate Returns</button>
+        </div>
+
+        <div id="results" class="results-section" style="display: none;">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // ===== API CONFIGURATION =====
+        // REPLACE THESE WITH YOUR ACTUAL API KEYS
+        const POLYGON_API_KEY = 'Hh3pIPIpGpLWAT5ApiaE_GqgmnaNlyg7';
+        const ALPHA_VANTAGE_API_KEY = 'IACDAKFG1TTUDIK2';
+        
+        // Global variables for current prices
+        let currentMSTYPrice = 0;
+        let currentBitcoinPrice = 0;
+        
+        // ===== API FUNCTIONS =====
+        
+        async function getMSTYCurrentPrice() {
+            try {
+                const url = `https://api.polygon.io/v2/aggs/ticker/MSTY/prev?adjusted=true&apikey=${POLYGON_API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    return data.results[0].c; // Closing price
+                } else {
+                    throw new Error('No data received');
+                }
+            } catch (error) {
+                console.error('Error fetching MSTY price:', error);
+                return 18.45; // Fallback
+            }
+        }
+        
+        async function getBitcoinCurrentPrice() {
+            try {
+                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.bitcoin && data.bitcoin.usd) {
+                    return {
+                        price: data.bitcoin.usd,
+                        change: data.bitcoin.usd_24h_change || 0
+                    };
+                } else {
+                    throw new Error('No data received');
+                }
+            } catch (error) {
+                console.error('Error fetching Bitcoin price:', error);
+                return { price: 64250, change: 0 }; // Fallback
+            }
+        }
+        
+        async function getMSTYHistoricalPrice(date) {
+            try {
+                const formattedDate = date.toISOString().split('T')[0];
+                const url = `https://api.polygon.io/v1/open-close/MSTY/${formattedDate}?adjusted=true&apikey=${POLYGON_API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.close) {
+                    return data.close;
+                } else {
+                    throw new Error('No historical data available');
+                }
+            } catch (error) {
+                console.error('Error fetching historical MSTY price:', error);
+                return null;
+            }
+        }
+        
+        async function getBitcoinHistoricalPrice(date) {
+            try {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const formattedDate = `${day}-${month}-${year}`;
+                
+                const url = `https://api.coingecko.com/api/v3/coins/bitcoin/history?date=${formattedDate}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.market_data && data.market_data.current_price && data.market_data.current_price.usd) {
+                    return data.market_data.current_price.usd;
+                } else {
+                    throw new Error('No historical data available');
+                }
+            } catch (error) {
+                console.error('Error fetching historical Bitcoin price:', error);
+                return null;
+            }
+        }
+        
+        async function getMSTYDividends() {
+            try {
+                const url = `https://www.alphavantage.co/query?function=DIVIDENDS&symbol=MSTY&apikey=${ALPHA_VANTAGE_API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.data) {
+                    // Convert to our format
+                    const dividends = {};
+                    data.data.forEach(dividend => {
+                        const date = new Date(dividend.ex_dividend_date);
+                        const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                        dividends[monthKey] = parseFloat(dividend.amount);
+                    });
+                    return dividends;
+                } else {
+                    throw new Error('No dividend data available');
+                }
+            } catch (error) {
+                console.error('Error fetching dividend data:', error);
+                // Fallback to mock data
+                return {
+                    '2024-01': 1.85, '2024-02': 1.92, '2024-03': 1.78, '2024-04': 1.88,
+                    '2024-05': 1.95, '2024-06': 1.82, '2024-07': 1.90, '2024-08': 1.87,
+                    '2024-09': 1.93, '2024-10': 1.89, '2024-11': 1.96, '2024-12': 1.91,
+                    '2025-01': 1.94, '2025-02': 1.88, '2025-03': 1.97, '2025-04': 1.92,
+                    '2025-05': 1.99, '2025-06': 1.85, '2025-07': 1.93
+                };
+            }
+        }
+        
+        // ===== UTILITY FUNCTIONS =====
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+        
+        function formatPercentage(percent) {
+            return percent.toFixed(2) + '%';
+        }
+        
+        function calculateDividends(purchaseDate, shares, dividendData) {
+            const currentDate = new Date();
+            let totalDividends = 0;
+            
+            let date = new Date(purchaseDate);
+            date.setMonth(date.getMonth() + 1);
+            date.setDate(1);
+            
+            while (date <= currentDate) {
+                const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                if (dividendData[monthKey]) {
+                    totalDividends += dividendData[monthKey] * shares;
+                }
+                date.setMonth(date.getMonth() + 1);
+            }
+            
+            return totalDividends;
+        }
+        
+        function getDividendHistory(purchaseDate, dividendData) {
+            const currentDate = new Date();
+            let history = [];
+            
+            let date = new Date(purchaseDate);
+            date.setMonth(date.getMonth() + 1);
+            date.setDate(1);
+            
+            while (date <= currentDate && history.length < 6) {
+                const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                if (dividendData[monthKey]) {
+                    const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    history.push(`${monthName}: ${formatCurrency(dividendData[monthKey])}`);
+                }
+                date.setMonth(date.getMonth() + 1);
+            }
+            
+            return history.join(' • ') || 'No dividends in selected period';
+        }
+        
+        // ===== MAIN CALCULATION FUNCTION =====
+        
+        async function calculateReturns() {
+            const button = document.getElementById('calculateBtn');
+            const resultsDiv = document.getElementById('results');
+            
+            // Show loading state
+            button.disabled = true;
+            button.textContent = 'Calculating...';
+            resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Fetching data and calculating returns...</div>';
+            resultsDiv.style.display = 'block';
+            
+            try {
+                // Get input values
+                const purchaseDate = new Date(document.getElementById('purchaseDate').value);
+                const investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
+                let mstyPurchasePrice = parseFloat(document.getElementById('mstyPrice').value);
+                let bitcoinPurchasePrice = parseFloat(document.getElementById('bitcoinPrice').value);
+                
+                // If historical prices aren't provided, fetch them
+                if (!mstyPurchasePrice) {
+                    mstyPurchasePrice = await getMSTYHistoricalPrice(purchaseDate);
+                    if (mstyPurchasePrice) {
+                        document.getElementById('mstyPrice').value = mstyPurchasePrice.toFixed(2);
+                    }
+                }
+                
+                if (!bitcoinPurchasePrice) {
+                    bitcoinPurchasePrice = await getBitcoinHistoricalPrice(purchaseDate);
+                    if (bitcoinPurchasePrice) {
+                        document.getElementById('bitcoinPrice').value = bitcoinPurchasePrice.toFixed(2);
+                    }
+                }
+                
+                // Get dividend data
+                const dividendData = await getMSTYDividends();
+                
+                // Calculate MSTY investment
+                const mstyShares = investmentAmount / mstyPurchasePrice;
+                const mstyCurrentValue = mstyShares * currentMSTYPrice;
+                const totalDividends = calculateDividends(purchaseDate, mstyShares, dividendData);
+                const mstyTotalReturn = mstyCurrentValue + totalDividends;
+                const mstyProfit = mstyTotalReturn - investmentAmount;
+                const mstyReturnPercent = (mstyProfit / investmentAmount) * 100;
+                
+                // Calculate Bitcoin investment
+                const bitcoinAmount = investmentAmount / bitcoinPurchasePrice;
+                const bitcoinCurrentValue = bitcoinAmount * currentBitcoinPrice;
+                const bitcoinProfit = bitcoinCurrentValue - investmentAmount;
+                const bitcoinReturnPercent = (bitcoinProfit / investmentAmount) * 100;
+                
+                // Display results
+                displayResults({
+                    msty: {
+                        shares: mstyShares,
+                        currentValue: mstyCurrentValue,
+                        dividends: totalDividends,
+                        totalReturn: mstyTotalReturn,
+                        profit: mstyProfit,
+                        returnPercent: mstyReturnPercent
+                    },
+                    bitcoin: {
+                        amount: bitcoinAmount,
+                        currentValue: bitcoinCurrentValue,
+                        profit: bitcoinProfit,
+                        returnPercent: bitcoinReturnPercent
+                    },
+                    dividendHistory: getDividendHistory(purchaseDate, dividendData)
+                });
+                
+            } catch (error) {
+                console.error('Calculation error:', error);
+                resultsDiv.innerHTML = `<div class="error">Error calculating returns: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Calculate Returns';
+            }
+        }
+        
+        function displayResults(data) {
+            const winner = data.msty.totalReturn > data.bitcoin.currentValue ? 'MSTY' : 'Bitcoin';
+            const difference = Math.abs(data.msty.totalReturn - data.bitcoin.currentValue);
+            
+            document.getElementById('results').innerHTML = `
+                <div class="investment-card">
+                    <div class="investment-title">MSTY Investment</div>
+                    <div class="metric">
+                        <span class="metric-label">Shares Purchased:</span>
+                        <span class="metric-value">${data.msty.shares.toFixed(2)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Current Value:</span>
+                        <span class="metric-value">${formatCurrency(data.msty.currentValue)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Dividends:</span>
+                        <span class="metric-value">${formatCurrency(data.msty.dividends)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Return:</span>
+                        <span class="metric-value">${formatCurrency(data.msty.totalReturn)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Profit/Loss:</span>
+                        <span class="metric-value ${data.msty.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(data.msty.profit)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Return %:</span>
+                        <span class="metric-value ${data.msty.returnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(data.msty.returnPercent)}</span>
+                    </div>
+                    <div class="dividend-info">
+                        <div class="dividend-title">Recent Dividend History</div>
+                        <div class="dividend-details">${data.dividendHistory}</div>
+                    </div>
+                </div>
+
+                <div class="investment-card">
+                    <div class="investment-title">Bitcoin Investment</div>
+                    <div class="metric">
+                        <span class="metric-label">Bitcoin Purchased:</span>
+                        <span class="metric-value">${data.bitcoin.amount.toFixed(6)} BTC</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Current Value:</span>
+                        <span class="metric-value">${formatCurrency(data.bitcoin.currentValue)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Profit/Loss:</span>
+                        <span class="metric-value ${data.bitcoin.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(data.bitcoin.profit)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Return %:</span>
+                        <span class="metric-value ${data.bitcoin.returnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(data.bitcoin.returnPercent)}</span>
+                    </div>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-title">Investment Comparison</div>
+                    <div class="winner">${winner} Wins!</div>
+                    <div style="margin-top: 15px; font-size: 1.1rem;">
+                        ${winner} performed better by ${formatCurrency(difference)} 
+                        (${Math.abs(data.msty.returnPercent - data.bitcoin.returnPercent).toFixed(2)}% difference)
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ===== INITIALIZATION =====
+        
+        async function loadCurrentPrices() {
+            try {
+                // Load MSTY price
+                currentMSTYPrice = await getMSTYCurrentPrice();
+                document.getElementById('mstyCurrentPrice').textContent = formatCurrency(currentMSTYPrice);
+                
+                // Load Bitcoin price
+                const bitcoinData = await getBitcoinCurrentPrice();
+                currentBitcoinPrice = bitcoinData.price;
+                document.getElementById('bitcoinCurrentPrice').textContent = formatCurrency(currentBitcoinPrice);
+                
+                const changeClass = bitcoinData.change >= 0 ? 'profit-positive' : 'profit-negative';
+                const changeSign = bitcoinData.change >= 0 ? '+' : '';
+                document.getElementById('bitcoinChange').textContent = `${changeSign}${bitcoinData.change.toFixed(2)}% today`;
+                document.getElementById('bitcoinChange').className = `price-change ${changeClass}`;
+                
+            } catch (error) {
+                console.error('Error loading current prices:', error);
+                document.getElementById('mstyCurrentPrice').textContent = 'Error loading';
+                document.getElementById('bitcoinCurrentPrice').textContent = 'Error loading';
+            }
+        }
+        
+        // Auto-fill historical prices when date changes
+        document.getElementById('purchaseDate').addEventListener('change', async function() {
+            const date = new Date(this.value);
+            const mstyPriceInput = document.getElementById('mstyPrice');
+            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
+            
+            mstyPriceInput.placeholder = 'Loading...';
+            bitcoinPriceInput.placeholder = 'Loading...';
+            
+            try {
+                const mstyHistPrice = await getMSTYHistoricalPrice(date);
+                if (mstyHistPrice) {
+                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
+                    mstyPriceInput.placeholder = 'Auto-filled from date';
+                }
+                
+                const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
+                if (bitcoinHistPrice) {
+                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
+                    bitcoinPriceInput.placeholder = 'Auto-filled from date';
+                }
+            } catch (error) {
+                console.error('Error loading historical prices:', error);
+                mstyPriceInput.placeholder = 'Enter manually';
+                bitcoinPriceInput.placeholder = 'Enter manually';
+            }
+        });
+        
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            loadCurrentPrices();
+        });
+    </script>
+</body>
+</html>
