@@ -313,11 +313,11 @@
                 </div>
                 <div class="input-group">
                     <label for="mstyPrice">MSTY Price at Purchase ($)</label>
-                    <input type="number" id="mstyPrice" value="" min="0.01" step="0.01" placeholder="Auto-filled from date">
+                    <input type="number" id="mstyPrice" value="" min="0.01" step="0.01" placeholder="Enter price OR leave blank to auto-fill">
                 </div>
                 <div class="input-group">
                     <label for="bitcoinPrice">Bitcoin Price at Purchase ($)</label>
-                    <input type="number" id="bitcoinPrice" value="" min="0.01" step="0.01" placeholder="Auto-filled from date">
+                    <input type="number" id="bitcoinPrice" value="" min="0.01" step="0.01" placeholder="Enter price OR leave blank to auto-fill">
                 </div>
             </div>
             <button class="calculate-btn" onclick="calculateReturns()" id="calculateBtn">Calculate Returns</button>
@@ -692,33 +692,81 @@
             }
         }
         
-        // Auto-fill historical prices when date changes
+        // Smart auto-fill: when user enters one price, auto-fill the other
+        async function smartAutoFill() {
+            const date = new Date(document.getElementById('purchaseDate').value);
+            const mstyPriceInput = document.getElementById('mstyPrice');
+            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
+            
+            const mstyValue = mstyPriceInput.value;
+            const bitcoinValue = bitcoinPriceInput.value;
+            
+            // If user entered MSTY price but not Bitcoin price
+            if (mstyValue && !bitcoinValue) {
+                bitcoinPriceInput.placeholder = 'Loading Bitcoin price...';
+                try {
+                    const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
+                    if (bitcoinHistPrice) {
+                        bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
+                        bitcoinPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
+                    }
+                } catch (error) {
+                    bitcoinPriceInput.placeholder = 'Could not auto-fill';
+                }
+            }
+            
+            // If user entered Bitcoin price but not MSTY price
+            if (bitcoinValue && !mstyValue) {
+                mstyPriceInput.placeholder = 'Loading MSTY price...';
+                try {
+                    const mstyHistPrice = await getMSTYHistoricalPrice(date);
+                    if (mstyHistPrice) {
+                        mstyPriceInput.value = mstyHistPrice.toFixed(2);
+                        mstyPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
+                    }
+                } catch (error) {
+                    mstyPriceInput.placeholder = 'Could not auto-fill';
+                }
+            }
+        }
+        
+        // Auto-fill when date changes (only if both fields are empty)
         document.getElementById('purchaseDate').addEventListener('change', async function() {
             const date = new Date(this.value);
             const mstyPriceInput = document.getElementById('mstyPrice');
             const bitcoinPriceInput = document.getElementById('bitcoinPrice');
             
-            mstyPriceInput.placeholder = 'Loading...';
-            bitcoinPriceInput.placeholder = 'Loading...';
-            
-            try {
-                const mstyHistPrice = await getMSTYHistoricalPrice(date);
-                if (mstyHistPrice) {
-                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
-                    mstyPriceInput.placeholder = 'Auto-filled from date';
-                }
+            // Only auto-fill if both fields are empty
+            if (!mstyPriceInput.value && !bitcoinPriceInput.value) {
+                mstyPriceInput.placeholder = 'Loading...';
+                bitcoinPriceInput.placeholder = 'Loading...';
                 
-                const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
-                if (bitcoinHistPrice) {
-                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
-                    bitcoinPriceInput.placeholder = 'Auto-filled from date';
+                try {
+                    const [mstyHistPrice, bitcoinHistPrice] = await Promise.all([
+                        getMSTYHistoricalPrice(date),
+                        getBitcoinHistoricalPrice(date)
+                    ]);
+                    
+                    if (mstyHistPrice) {
+                        mstyPriceInput.value = mstyHistPrice.toFixed(2);
+                    }
+                    if (bitcoinHistPrice) {
+                        bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
+                    }
+                    
+                    mstyPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
+                    bitcoinPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
+                } catch (error) {
+                    console.error('Error loading historical prices:', error);
+                    mstyPriceInput.placeholder = 'Enter manually or auto-fill';
+                    bitcoinPriceInput.placeholder = 'Enter manually or auto-fill';
                 }
-            } catch (error) {
-                console.error('Error loading historical prices:', error);
-                mstyPriceInput.placeholder = 'Enter manually';
-                bitcoinPriceInput.placeholder = 'Enter manually';
             }
         });
+        
+        // Add event listeners for smart auto-fill when user types in price fields
+        document.getElementById('mstyPrice').addEventListener('blur', smartAutoFill);
+        document.getElementById('bitcoinPrice').addEventListener('blur', smartAutoFill);
         
         // Initialize on page load
         window.addEventListener('load', function() {
