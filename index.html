@@ -247,12 +247,30 @@
             const bitcoinInput = document.getElementById('bitcoinPrice');
             const btn = document.getElementById('mstyGoBtn');
             
-            if (!mstyPrice) { alert('Please enter MSTY price first'); return; }
+            // Check if MSTY price is entered
+            if (!mstyPrice || mstyPrice.trim() === '') { 
+                alert('Please enter the MSTY price you actually paid first, then click Go to auto-fill Bitcoin price'); 
+                return; 
+            }
             
-            btn.disabled = true; btn.textContent = 'Loading...';
-            const price = await getBitcoinHistoricalPrice(date);
-            if (price) bitcoinInput.value = price.toFixed(2);
-            btn.disabled = false; btn.textContent = 'Go';
+            btn.disabled = true; 
+            btn.textContent = 'Loading...';
+            bitcoinInput.placeholder = 'Fetching Bitcoin price for ' + date.toDateString() + '...';
+            
+            try {
+                const price = await getBitcoinHistoricalPrice(date);
+                if (price) {
+                    bitcoinInput.value = price.toFixed(2);
+                    bitcoinInput.placeholder = 'Auto-filled for ' + date.toDateString();
+                } else {
+                    bitcoinInput.placeholder = 'Could not fetch Bitcoin price for this date';
+                }
+            } catch (error) {
+                bitcoinInput.placeholder = 'Error fetching Bitcoin price';
+            }
+            
+            btn.disabled = false; 
+            btn.textContent = 'Go';
         }
 
         async function autoFillMSTY() {
@@ -261,12 +279,30 @@
             const mstyInput = document.getElementById('mstyPrice');
             const btn = document.getElementById('bitcoinGoBtn');
             
-            if (!bitcoinPrice) { alert('Please enter Bitcoin price first'); return; }
+            // Check if Bitcoin price is entered
+            if (!bitcoinPrice || bitcoinPrice.trim() === '') { 
+                alert('Please enter the Bitcoin price you actually paid first, then click Go to auto-fill MSTY price'); 
+                return; 
+            }
             
-            btn.disabled = true; btn.textContent = 'Loading...';
-            const price = await getMSTYHistoricalPrice(date);
-            if (price) mstyInput.value = price.toFixed(2);
-            btn.disabled = false; btn.textContent = 'Go';
+            btn.disabled = true; 
+            btn.textContent = 'Loading...';
+            mstyInput.placeholder = 'Fetching MSTY price for ' + date.toDateString() + '...';
+            
+            try {
+                const price = await getMSTYHistoricalPrice(date);
+                if (price) {
+                    mstyInput.value = price.toFixed(2);
+                    mstyInput.placeholder = 'Auto-filled for ' + date.toDateString();
+                } else {
+                    mstyInput.placeholder = 'Could not fetch MSTY price for this date';
+                }
+            } catch (error) {
+                mstyInput.placeholder = 'Error fetching MSTY price';
+            }
+            
+            btn.disabled = false; 
+            btn.textContent = 'Go';
         }
 
         async function justCurious() {
