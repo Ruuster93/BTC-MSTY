@@ -13,15 +13,30 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000;
             min-height: 100vh;
             color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Matrix falling code background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
@@ -33,20 +48,23 @@
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(255, 165, 0, 0.5);
+            color: #ff8c00;
         }
 
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
+            color: #ffa500;
         }
 
         .calculator-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(255, 165, 0, 0.2);
             padding: 30px;
             margin-bottom: 30px;
+            backdrop-filter: blur(10px);
         }
 
         .input-section {
@@ -67,6 +85,16 @@
             color: #555;
         }
 
+        .price-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .price-input-wrapper input {
+            flex: 1;
+        }
+
         .input-group input {
             padding: 12px;
             border: 2px solid #e1e5e9;
@@ -77,7 +105,65 @@
 
         .input-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #ff8c00;
+        }
+
+        .go-btn {
+            background: linear-gradient(135deg, #ff8c00 0%, #ff6600 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .go-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .go-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .curious-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .curious-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .curious-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .curious-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .curious-description {
+            font-size: 0.9rem;
+            color: #666;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.4;
         }
 
         .calculate-btn {
@@ -90,6 +176,7 @@
             cursor: pointer;
             transition: transform 0.2s ease;
             font-weight: 600;
+            width: 100%;
         }
 
         .calculate-btn:hover {
@@ -124,7 +211,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #ff8c00, #ff6600);
         }
 
         .investment-title {
@@ -193,11 +280,12 @@
         }
 
         .price-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(255, 165, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .price-title {
@@ -253,7 +341,7 @@
 
         .loading-spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #ff8c00;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -278,10 +366,21 @@
             .input-section {
                 grid-template-columns: 1fr;
             }
+
+            .price-input-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .go-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+    <canvas id="matrix-canvas"></canvas>
+    
     <div class="container">
         <div class="header">
             <h1>MSTY vs Bitcoin Calculator</h1>
@@ -311,15 +410,32 @@
                     <label for="investmentAmount">Investment Amount ($)</label>
                     <input type="number" id="investmentAmount" value="10000" min="1" step="0.01">
                 </div>
+            </div>
+
+            <div class="curious-section">
+                <button class="curious-btn" onclick="justCurious()" id="curiousBtn">Just Curious</button>
+                <div class="curious-description">
+                    Click here if you haven't bought either but are curious which would have performed better on the selected date
+                </div>
+            </div>
+
+            <div class="input-section">
                 <div class="input-group">
                     <label for="mstyPrice">MSTY Price at Purchase ($)</label>
-                    <input type="number" id="mstyPrice" value="" min="0.01" step="0.01" placeholder="Enter price OR leave blank to auto-fill">
+                    <div class="price-input-wrapper">
+                        <input type="number" id="mstyPrice" value="" min="0.01" step="0.01" placeholder="Enter MSTY price">
+                        <button class="go-btn" onclick="autoFillBitcoin()" id="mstyGoBtn">Go</button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="bitcoinPrice">Bitcoin Price at Purchase ($)</label>
-                    <input type="number" id="bitcoinPrice" value="" min="0.01" step="0.01" placeholder="Enter price OR leave blank to auto-fill">
+                    <div class="price-input-wrapper">
+                        <input type="number" id="bitcoinPrice" value="" min="0.01" step="0.01" placeholder="Enter Bitcoin price">
+                        <button class="go-btn" onclick="autoFillMSTY()" id="bitcoinGoBtn">Go</button>
+                    </div>
                 </div>
             </div>
+
             <button class="calculate-btn" onclick="calculateReturns()" id="calculateBtn">Calculate Returns</button>
         </div>
 
@@ -329,10 +445,90 @@
     </div>
 
     <script>
+        // Matrix falling code animation
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let matrixAnimationId;
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Reinitialize drops when canvas resizes
+            const columns = Math.floor(canvas.width / fontSize);
+            drops.length = columns;
+            for (let i = 0; i < columns; i++) {
+                if (drops[i] === undefined) {
+                    drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+                }
+            }
+        }
+
+        // Matrix characters (mix of numbers, letters, and symbols)
+        const matrixChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$€¥₿+-*/=<>{}[]()';
+        const fontSize = 16;
+        let drops = [];
+
+        // Initialize
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawMatrix() {
+            // Black background with slight transparency for trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Orange glowing text
+            ctx.fillStyle = '#ff8c00';
+            ctx.font = `${fontSize}px 'Courier New', monospace`;
+            ctx.textAlign = 'center';
+
+            const columns = Math.floor(canvas.width / fontSize);
+            
+            for (let i = 0; i < columns; i++) {
+                const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                const x = (i * fontSize) + (fontSize / 2);
+                const y = drops[i] * fontSize;
+
+                // Add glow effect
+                ctx.shadowColor = '#ff8c00';
+                ctx.shadowBlur = 8;
+                ctx.fillText(char, x, y);
+                ctx.shadowBlur = 0;
+
+                // Reset drop to top randomly or when it goes off screen
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+
+            matrixAnimationId = requestAnimationFrame(drawMatrix);
+        }
+
+        // Start matrix animation when page loads
+        function startMatrix() {
+            // Clear any existing animation
+            if (matrixAnimationId) {
+                cancelAnimationFrame(matrixAnimationId);
+            }
+            
+            // Fill the screen with black first
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Start the animation
+            drawMatrix();
+        }
+
+        // Start after a brief delay to ensure everything is loaded
+        setTimeout(startMatrix, 100);
+
         // ===== API CONFIGURATION =====
         // REPLACE THESE WITH YOUR ACTUAL API KEYS
-        const POLYGON_API_KEY = 'Hh3pIPIpGpLWAT5ApiaE_GqgmnaNlyg7';
-        const ALPHA_VANTAGE_API_KEY = 'IACDAKFG1TTUDIK2';
+        const POLYGON_API_KEY = Hh3pIPIpGpLWAT5ApiaE_GqgmnaNlyg7;
+        const ALPHA_VANTAGE_API_KEY = IACDAKFG1TTUDIK2;
         
         // Global variables for current prices
         let currentMSTYPrice = 0;
@@ -468,6 +664,110 @@
             }
         }
         
+        // ===== NEW BUTTON FUNCTIONS =====
+        
+        async function autoFillBitcoin() {
+            const date = new Date(document.getElementById('purchaseDate').value);
+            const mstyPrice = document.getElementById('mstyPrice').value;
+            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
+            const goBtn = document.getElementById('mstyGoBtn');
+            
+            if (!mstyPrice) {
+                alert('Please enter MSTY price first');
+                return;
+            }
+            
+            goBtn.disabled = true;
+            goBtn.textContent = 'Loading...';
+            bitcoinPriceInput.placeholder = 'Fetching Bitcoin price...';
+            
+            try {
+                const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
+                if (bitcoinHistPrice) {
+                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
+                    bitcoinPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
+                } else {
+                    bitcoinPriceInput.placeholder = 'Could not fetch price for this date';
+                }
+            } catch (error) {
+                bitcoinPriceInput.placeholder = 'Error fetching price';
+            } finally {
+                goBtn.disabled = false;
+                goBtn.textContent = 'Go';
+            }
+        }
+        
+        async function autoFillMSTY() {
+            const date = new Date(document.getElementById('purchaseDate').value);
+            const bitcoinPrice = document.getElementById('bitcoinPrice').value;
+            const mstyPriceInput = document.getElementById('mstyPrice');
+            const goBtn = document.getElementById('bitcoinGoBtn');
+            
+            if (!bitcoinPrice) {
+                alert('Please enter Bitcoin price first');
+                return;
+            }
+            
+            goBtn.disabled = true;
+            goBtn.textContent = 'Loading...';
+            mstyPriceInput.placeholder = 'Fetching MSTY price...';
+            
+            try {
+                const mstyHistPrice = await getMSTYHistoricalPrice(date);
+                if (mstyHistPrice) {
+                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
+                    mstyPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
+                } else {
+                    mstyPriceInput.placeholder = 'Could not fetch price for this date';
+                }
+            } catch (error) {
+                mstyPriceInput.placeholder = 'Error fetching price';
+            } finally {
+                goBtn.disabled = false;
+                goBtn.textContent = 'Go';
+            }
+        }
+        
+        async function justCurious() {
+            const date = new Date(document.getElementById('purchaseDate').value);
+            const mstyPriceInput = document.getElementById('mstyPrice');
+            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
+            const curiousBtn = document.getElementById('curiousBtn');
+            
+            curiousBtn.disabled = true;
+            curiousBtn.textContent = 'Loading...';
+            mstyPriceInput.placeholder = 'Fetching MSTY price...';
+            bitcoinPriceInput.placeholder = 'Fetching Bitcoin price...';
+            
+            try {
+                const [mstyHistPrice, bitcoinHistPrice] = await Promise.all([
+                    getMSTYHistoricalPrice(date),
+                    getBitcoinHistoricalPrice(date)
+                ]);
+                
+                if (mstyHistPrice) {
+                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
+                    mstyPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
+                } else {
+                    mstyPriceInput.placeholder = 'Could not fetch MSTY price';
+                }
+                
+                if (bitcoinHistPrice) {
+                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
+                    bitcoinPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
+                } else {
+                    bitcoinPriceInput.placeholder = 'Could not fetch Bitcoin price';
+                }
+            } catch (error) {
+                console.error('Error in justCurious:', error);
+                mstyPriceInput.placeholder = 'Error fetching prices';
+                bitcoinPriceInput.placeholder = 'Error fetching prices';
+            } finally {
+                curiousBtn.disabled = false;
+                curiousBtn.textContent = 'Just Curious';
+            }
+        }
+        
         // ===== UTILITY FUNCTIONS =====
         
         function formatCurrency(amount) {
@@ -526,6 +826,15 @@
             const button = document.getElementById('calculateBtn');
             const resultsDiv = document.getElementById('results');
             
+            // Validate inputs
+            const mstyPrice = parseFloat(document.getElementById('mstyPrice').value);
+            const bitcoinPrice = parseFloat(document.getElementById('bitcoinPrice').value);
+            
+            if (!mstyPrice || !bitcoinPrice) {
+                alert('Please fill in both MSTY and Bitcoin prices. Use the "Go" buttons or "Just Curious" to auto-fill missing prices.');
+                return;
+            }
+            
             // Show loading state
             button.disabled = true;
             button.textContent = 'Calculating...';
@@ -536,29 +845,12 @@
                 // Get input values
                 const purchaseDate = new Date(document.getElementById('purchaseDate').value);
                 const investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
-                let mstyPurchasePrice = parseFloat(document.getElementById('mstyPrice').value);
-                let bitcoinPurchasePrice = parseFloat(document.getElementById('bitcoinPrice').value);
-                
-                // If historical prices aren't provided, fetch them
-                if (!mstyPurchasePrice) {
-                    mstyPurchasePrice = await getMSTYHistoricalPrice(purchaseDate);
-                    if (mstyPurchasePrice) {
-                        document.getElementById('mstyPrice').value = mstyPurchasePrice.toFixed(2);
-                    }
-                }
-                
-                if (!bitcoinPurchasePrice) {
-                    bitcoinPurchasePrice = await getBitcoinHistoricalPrice(purchaseDate);
-                    if (bitcoinPurchasePrice) {
-                        document.getElementById('bitcoinPrice').value = bitcoinPurchasePrice.toFixed(2);
-                    }
-                }
                 
                 // Get dividend data
                 const dividendData = await getMSTYDividends();
                 
                 // Calculate MSTY investment
-                const mstyShares = investmentAmount / mstyPurchasePrice;
+                const mstyShares = investmentAmount / mstyPrice;
                 const mstyCurrentValue = mstyShares * currentMSTYPrice;
                 const totalDividends = calculateDividends(purchaseDate, mstyShares, dividendData);
                 const mstyTotalReturn = mstyCurrentValue + totalDividends;
@@ -566,7 +858,7 @@
                 const mstyReturnPercent = (mstyProfit / investmentAmount) * 100;
                 
                 // Calculate Bitcoin investment
-                const bitcoinAmount = investmentAmount / bitcoinPurchasePrice;
+                const bitcoinAmount = investmentAmount / bitcoinPrice;
                 const bitcoinCurrentValue = bitcoinAmount * currentBitcoinPrice;
                 const bitcoinProfit = bitcoinCurrentValue - investmentAmount;
                 const bitcoinReturnPercent = (bitcoinProfit / investmentAmount) * 100;
@@ -599,179 +891,4 @@
             }
         }
         
-        function displayResults(data) {
-            const winner = data.msty.totalReturn > data.bitcoin.currentValue ? 'MSTY' : 'Bitcoin';
-            const difference = Math.abs(data.msty.totalReturn - data.bitcoin.currentValue);
-            
-            document.getElementById('results').innerHTML = `
-                <div class="investment-card">
-                    <div class="investment-title">MSTY Investment</div>
-                    <div class="metric">
-                        <span class="metric-label">Shares Purchased:</span>
-                        <span class="metric-value">${data.msty.shares.toFixed(2)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Current Value:</span>
-                        <span class="metric-value">${formatCurrency(data.msty.currentValue)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Total Dividends:</span>
-                        <span class="metric-value">${formatCurrency(data.msty.dividends)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Total Return:</span>
-                        <span class="metric-value">${formatCurrency(data.msty.totalReturn)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Profit/Loss:</span>
-                        <span class="metric-value ${data.msty.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(data.msty.profit)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Return %:</span>
-                        <span class="metric-value ${data.msty.returnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(data.msty.returnPercent)}</span>
-                    </div>
-                    <div class="dividend-info">
-                        <div class="dividend-title">Recent Dividend History</div>
-                        <div class="dividend-details">${data.dividendHistory}</div>
-                    </div>
-                </div>
-
-                <div class="investment-card">
-                    <div class="investment-title">Bitcoin Investment</div>
-                    <div class="metric">
-                        <span class="metric-label">Bitcoin Purchased:</span>
-                        <span class="metric-value">${data.bitcoin.amount.toFixed(6)} BTC</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Current Value:</span>
-                        <span class="metric-value">${formatCurrency(data.bitcoin.currentValue)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Profit/Loss:</span>
-                        <span class="metric-value ${data.bitcoin.profit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(data.bitcoin.profit)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Return %:</span>
-                        <span class="metric-value ${data.bitcoin.returnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(data.bitcoin.returnPercent)}</span>
-                    </div>
-                </div>
-
-                <div class="comparison-section">
-                    <div class="comparison-title">Investment Comparison</div>
-                    <div class="winner">${winner} Wins!</div>
-                    <div style="margin-top: 15px; font-size: 1.1rem;">
-                        ${winner} performed better by ${formatCurrency(difference)} 
-                        (${Math.abs(data.msty.returnPercent - data.bitcoin.returnPercent).toFixed(2)}% difference)
-                    </div>
-                </div>
-            `;
-        }
-        
-        // ===== INITIALIZATION =====
-        
-        async function loadCurrentPrices() {
-            try {
-                // Load MSTY price
-                currentMSTYPrice = await getMSTYCurrentPrice();
-                document.getElementById('mstyCurrentPrice').textContent = formatCurrency(currentMSTYPrice);
-                
-                // Load Bitcoin price
-                const bitcoinData = await getBitcoinCurrentPrice();
-                currentBitcoinPrice = bitcoinData.price;
-                document.getElementById('bitcoinCurrentPrice').textContent = formatCurrency(currentBitcoinPrice);
-                
-                const changeClass = bitcoinData.change >= 0 ? 'profit-positive' : 'profit-negative';
-                const changeSign = bitcoinData.change >= 0 ? '+' : '';
-                document.getElementById('bitcoinChange').textContent = `${changeSign}${bitcoinData.change.toFixed(2)}% today`;
-                document.getElementById('bitcoinChange').className = `price-change ${changeClass}`;
-                
-            } catch (error) {
-                console.error('Error loading current prices:', error);
-                document.getElementById('mstyCurrentPrice').textContent = 'Error loading';
-                document.getElementById('bitcoinCurrentPrice').textContent = 'Error loading';
-            }
-        }
-        
-        // Smart auto-fill: when user enters one price, auto-fill the other
-        async function smartAutoFill() {
-            const date = new Date(document.getElementById('purchaseDate').value);
-            const mstyPriceInput = document.getElementById('mstyPrice');
-            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
-            
-            const mstyValue = mstyPriceInput.value;
-            const bitcoinValue = bitcoinPriceInput.value;
-            
-            // If user entered MSTY price but not Bitcoin price
-            if (mstyValue && !bitcoinValue) {
-                bitcoinPriceInput.placeholder = 'Loading Bitcoin price...';
-                try {
-                    const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
-                    if (bitcoinHistPrice) {
-                        bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
-                        bitcoinPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
-                    }
-                } catch (error) {
-                    bitcoinPriceInput.placeholder = 'Could not auto-fill';
-                }
-            }
-            
-            // If user entered Bitcoin price but not MSTY price
-            if (bitcoinValue && !mstyValue) {
-                mstyPriceInput.placeholder = 'Loading MSTY price...';
-                try {
-                    const mstyHistPrice = await getMSTYHistoricalPrice(date);
-                    if (mstyHistPrice) {
-                        mstyPriceInput.value = mstyHistPrice.toFixed(2);
-                        mstyPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
-                    }
-                } catch (error) {
-                    mstyPriceInput.placeholder = 'Could not auto-fill';
-                }
-            }
-        }
-        
-        // Auto-fill when date changes (only if both fields are empty)
-        document.getElementById('purchaseDate').addEventListener('change', async function() {
-            const date = new Date(this.value);
-            const mstyPriceInput = document.getElementById('mstyPrice');
-            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
-            
-            // Only auto-fill if both fields are empty
-            if (!mstyPriceInput.value && !bitcoinPriceInput.value) {
-                mstyPriceInput.placeholder = 'Loading...';
-                bitcoinPriceInput.placeholder = 'Loading...';
-                
-                try {
-                    const [mstyHistPrice, bitcoinHistPrice] = await Promise.all([
-                        getMSTYHistoricalPrice(date),
-                        getBitcoinHistoricalPrice(date)
-                    ]);
-                    
-                    if (mstyHistPrice) {
-                        mstyPriceInput.value = mstyHistPrice.toFixed(2);
-                    }
-                    if (bitcoinHistPrice) {
-                        bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
-                    }
-                    
-                    mstyPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
-                    bitcoinPriceInput.placeholder = 'Auto-filled for ' + date.toLocaleDateString();
-                } catch (error) {
-                    console.error('Error loading historical prices:', error);
-                    mstyPriceInput.placeholder = 'Enter manually or auto-fill';
-                    bitcoinPriceInput.placeholder = 'Enter manually or auto-fill';
-                }
-            }
-        });
-        
-        // Add event listeners for smart auto-fill when user types in price fields
-        document.getElementById('mstyPrice').addEventListener('blur', smartAutoFill);
-        document.getElementById('bitcoinPrice').addEventListener('blur', smartAutoFill);
-        
-        // Initialize on page load
-        window.addEventListener('load', function() {
-            loadCurrentPrices();
-        });
-    </script>
-</body>
-</html>
+        function displayResults(data
