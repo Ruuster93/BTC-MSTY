@@ -5,377 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSTY vs Bitcoin Investment Calculator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            min-height: 100vh;
-            color: #333;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Matrix falling code background */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(255, 165, 0, 0.5);
-            color: #ff8c00;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            color: #ffa500;
-        }
-
-        .calculator-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(255, 165, 0, 0.2);
-            padding: 30px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .input-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
-        }
-
-        .price-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .price-input-wrapper input {
-            flex: 1;
-        }
-
-        .input-group input {
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #ff8c00;
-        }
-
-        .go-btn {
-            background: linear-gradient(135deg, #ff8c00 0%, #ff6600 100%);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .go-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .go-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .curious-section {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .curious-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .curious-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .curious-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .curious-description {
-            font-size: 0.9rem;
-            color: #666;
-            max-width: 400px;
-            margin: 0 auto;
-            line-height: 1.4;
-        }
-
-        .calculate-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            font-weight: 600;
-            width: 100%;
-        }
-
-        .calculate-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .calculate-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .results-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .investment-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            padding: 25px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .investment-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ff8c00, #ff6600);
-        }
-
-        .investment-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .metric:last-child {
-            border-bottom: none;
-        }
-
-        .metric-label {
-            font-weight: 600;
-            color: #666;
-        }
-
-        .metric-value {
-            font-weight: 700;
-            color: #333;
-        }
-
-        .profit-positive {
-            color: #28a745;
-        }
-
-        .profit-negative {
-            color: #dc3545;
-        }
-
-        .comparison-section {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .comparison-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-
-        .winner {
-            font-size: 2rem;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .current-prices {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .price-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(255, 165, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .price-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #666;
-        }
-
-        .price-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .price-change {
-            font-size: 1rem;
-            margin-top: 5px;
-        }
-
-        .dividend-info {
-            background: #e8f5e8;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .dividend-title {
-            font-weight: 600;
-            color: #155724;
-            margin-bottom: 10px;
-        }
-
-        .dividend-details {
-            color: #155724;
-            font-size: 0.9rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.2rem;
-            color: #666;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff8c00;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .results-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .input-section {
-                grid-template-columns: 1fr;
-            }
-
-            .price-input-wrapper {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .go-btn {
-                width: 100%;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; min-height: 100vh; color: #333; position: relative; overflow-x: hidden; }
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(255, 165, 0, 0.5); color: #ff8c00; }
+        .header p { font-size: 1.2rem; opacity: 0.9; color: #ffa500; }
+        .calculator-card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 20px 40px rgba(255, 165, 0, 0.2); padding: 30px; margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .input-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { font-weight: 600; margin-bottom: 8px; color: #555; }
+        .price-input-wrapper { display: flex; gap: 10px; align-items: flex-end; }
+        .price-input-wrapper input { flex: 1; }
+        .input-group input { padding: 12px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 16px; transition: border-color 0.3s ease; }
+        .input-group input:focus { outline: none; border-color: #ff8c00; }
+        .go-btn { background: linear-gradient(135deg, #ff8c00 0%, #ff6600 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: transform 0.2s ease; white-space: nowrap; }
+        .go-btn:hover { transform: translateY(-2px); }
+        .go-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .curious-section { text-align: center; margin: 20px 0; }
+        .curious-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 15px; cursor: pointer; transition: transform 0.2s ease; font-weight: 600; margin-bottom: 10px; }
+        .curious-btn:hover { transform: translateY(-2px); }
+        .curious-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .curious-description { font-size: 0.9rem; color: #666; max-width: 400px; margin: 0 auto; line-height: 1.4; }
+        .calculate-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 10px; cursor: pointer; transition: transform 0.2s ease; font-weight: 600; width: 100%; }
+        .calculate-btn:hover { transform: translateY(-2px); }
+        .calculate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .results-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .investment-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; padding: 25px; position: relative; overflow: hidden; }
+        .investment-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ff8c00, #ff6600); }
+        .investment-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: #333; }
+        .metric { display: flex; justify-content: space-between; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #dee2e6; }
+        .metric:last-child { border-bottom: none; }
+        .metric-label { font-weight: 600; color: #666; }
+        .metric-value { font-weight: 700; color: #333; }
+        .profit-positive { color: #28a745; }
+        .profit-negative { color: #dc3545; }
+        .comparison-section { grid-column: 1 / -1; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 15px; padding: 25px; text-align: center; margin-top: 20px; }
+        .comparison-title { font-size: 1.8rem; margin-bottom: 20px; }
+        .winner { font-size: 2rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .current-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .price-card { background: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 10px 20px rgba(255, 165, 0, 0.1); backdrop-filter: blur(10px); }
+        .price-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #666; }
+        .price-value { font-size: 2rem; font-weight: 700; color: #333; }
+        .price-change { font-size: 1rem; margin-top: 5px; }
+        .dividend-info { background: #e8f5e8; border-radius: 10px; padding: 15px; margin-top: 15px; }
+        .dividend-title { font-weight: 600; color: #155724; margin-bottom: 10px; }
+        .dividend-details { color: #155724; font-size: 0.9rem; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
+        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin: 20px 0; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ff8c00; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .results-section { grid-template-columns: 1fr; } .header h1 { font-size: 2rem; } .input-section { grid-template-columns: 1fr; } .price-input-wrapper { flex-direction: column; gap: 10px; } .go-btn { width: 100%; } }
     </style>
 </head>
 <body>
@@ -439,371 +120,188 @@
             <button class="calculate-btn" onclick="calculateReturns()" id="calculateBtn">Calculate Returns</button>
         </div>
 
-        <div id="results" class="results-section" style="display: none;">
-            <!-- Results will be populated here -->
-        </div>
+        <div id="results" class="results-section" style="display: none;"></div>
     </div>
 
     <script>
-        // Matrix falling code animation
+        // ===== API CONFIGURATION =====
+        const POLYGON_API_KEY = 'Hh3pIPIpGpLWAT5ApiaE_GqgmnaNlyg7';
+        const ALPHA_VANTAGE_API_KEY = 'IACDAKFG1TTUDIK2';
+        
+        let currentMSTYPrice = 0;
+        let currentBitcoinPrice = 0;
+
+        // ===== MATRIX ANIMATION =====
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
-
-        let matrixAnimationId;
-
-        // Set canvas size
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Reinitialize drops when canvas resizes
-            const columns = Math.floor(canvas.width / fontSize);
-            drops.length = columns;
-            for (let i = 0; i < columns; i++) {
-                if (drops[i] === undefined) {
-                    drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
-                }
-            }
-        }
-
-        // Matrix characters (mix of numbers, letters, and symbols)
-        const matrixChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$€¥₿+-*/=<>{}[]()';
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$€¥₿+-*/=<>{}[]()';
         const fontSize = 16;
         let drops = [];
 
-        // Initialize
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const columns = Math.floor(canvas.width / fontSize);
+            drops = Array(columns).fill(1).map(() => Math.floor(Math.random() * canvas.height / fontSize));
+        }
 
         function drawMatrix() {
-            // Black background with slight transparency for trail effect
             ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Orange glowing text
             ctx.fillStyle = '#ff8c00';
-            ctx.font = `${fontSize}px 'Courier New', monospace`;
-            ctx.textAlign = 'center';
-
-            const columns = Math.floor(canvas.width / fontSize);
+            ctx.font = `${fontSize}px monospace`;
             
-            for (let i = 0; i < columns; i++) {
-                const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                const x = (i * fontSize) + (fontSize / 2);
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSize;
                 const y = drops[i] * fontSize;
-
-                // Add glow effect
+                
                 ctx.shadowColor = '#ff8c00';
                 ctx.shadowBlur = 8;
                 ctx.fillText(char, x, y);
                 ctx.shadowBlur = 0;
-
-                // Reset drop to top randomly or when it goes off screen
-                if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
+                
+                if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             }
-
-            matrixAnimationId = requestAnimationFrame(drawMatrix);
+            requestAnimationFrame(drawMatrix);
         }
 
-        // Start matrix animation when page loads
-        function startMatrix() {
-            // Clear any existing animation
-            if (matrixAnimationId) {
-                cancelAnimationFrame(matrixAnimationId);
-            }
-            
-            // Fill the screen with black first
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Start the animation
-            drawMatrix();
-        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(() => { ctx.fillRect(0, 0, canvas.width, canvas.height); drawMatrix(); }, 100);
 
-        // Start after a brief delay to ensure everything is loaded
-        setTimeout(startMatrix, 100);
-
-        // ===== API CONFIGURATION =====
-        // REPLACE THESE WITH YOUR ACTUAL API KEYS
-        const POLYGON_API_KEY = 'Hh3pIPIpGpLWAT5ApiaE_GqgmnaNlyg7';
-        const ALPHA_VANTAGE_API_KEY = 'IACDAKFG1TTUDIK2';
-        
-        // Global variables for current prices
-        let currentMSTYPrice = 0;
-        let currentBitcoinPrice = 0;
-        
         // ===== API FUNCTIONS =====
-        
         async function getMSTYCurrentPrice() {
             try {
-                const url = `https://api.polygon.io/v2/aggs/ticker/MSTY/prev?adjusted=true&apikey=${POLYGON_API_KEY}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(`https://api.polygon.io/v2/aggs/ticker/MSTY/prev?adjusted=true&apikey=${POLYGON_API_KEY}`);
                 const data = await response.json();
-                if (data.results && data.results.length > 0) {
-                    return data.results[0].c; // Closing price
-                } else {
-                    throw new Error('No data received');
-                }
+                return data.results?.[0]?.c || 18.45;
             } catch (error) {
-                console.error('Error fetching MSTY price:', error);
-                return 18.45; // Fallback
+                console.error('MSTY price error:', error);
+                return 18.45;
             }
         }
-        
+
         async function getBitcoinCurrentPrice() {
             try {
-                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
                 const data = await response.json();
-                if (data.bitcoin && data.bitcoin.usd) {
-                    return {
-                        price: data.bitcoin.usd,
-                        change: data.bitcoin.usd_24h_change || 0
-                    };
-                } else {
-                    throw new Error('No data received');
-                }
+                return { price: data.bitcoin?.usd || 64250, change: data.bitcoin?.usd_24h_change || 0 };
             } catch (error) {
-                console.error('Error fetching Bitcoin price:', error);
-                return { price: 64250, change: 0 }; // Fallback
+                console.error('Bitcoin price error:', error);
+                return { price: 64250, change: 0 };
             }
         }
-        
+
         async function getMSTYHistoricalPrice(date) {
             try {
                 const formattedDate = date.toISOString().split('T')[0];
-                const url = `https://api.polygon.io/v1/open-close/MSTY/${formattedDate}?adjusted=true&apikey=${POLYGON_API_KEY}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(`https://api.polygon.io/v1/open-close/MSTY/${formattedDate}?adjusted=true&apikey=${POLYGON_API_KEY}`);
                 const data = await response.json();
-                if (data.close) {
-                    return data.close;
-                } else {
-                    throw new Error('No historical data available');
-                }
+                return data.close;
             } catch (error) {
-                console.error('Error fetching historical MSTY price:', error);
+                console.error('MSTY historical error:', error);
                 return null;
             }
         }
-        
+
         async function getBitcoinHistoricalPrice(date) {
             try {
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
                 const formattedDate = `${day}-${month}-${year}`;
-                
-                const url = `https://api.coingecko.com/api/v3/coins/bitcoin/history?date=${formattedDate}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/history?date=${formattedDate}`);
                 const data = await response.json();
-                if (data.market_data && data.market_data.current_price && data.market_data.current_price.usd) {
-                    return data.market_data.current_price.usd;
-                } else {
-                    throw new Error('No historical data available');
-                }
+                return data.market_data?.current_price?.usd;
             } catch (error) {
-                console.error('Error fetching historical Bitcoin price:', error);
+                console.error('Bitcoin historical error:', error);
                 return null;
             }
         }
-        
+
         async function getMSTYDividends() {
             try {
-                const url = `https://www.alphavantage.co/query?function=DIVIDENDS&symbol=MSTY&apikey=${ALPHA_VANTAGE_API_KEY}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(`https://www.alphavantage.co/query?function=DIVIDENDS&symbol=MSTY&apikey=${ALPHA_VANTAGE_API_KEY}`);
                 const data = await response.json();
+                const dividends = {};
                 if (data.data) {
-                    // Convert to our format
-                    const dividends = {};
                     data.data.forEach(dividend => {
                         const date = new Date(dividend.ex_dividend_date);
                         const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
                         dividends[monthKey] = parseFloat(dividend.amount);
                     });
                     return dividends;
-                } else {
-                    throw new Error('No dividend data available');
                 }
             } catch (error) {
-                console.error('Error fetching dividend data:', error);
-                // Fallback to mock data
-                return {
-                    '2024-01': 1.85, '2024-02': 1.92, '2024-03': 1.78, '2024-04': 1.88,
-                    '2024-05': 1.95, '2024-06': 1.82, '2024-07': 1.90, '2024-08': 1.87,
-                    '2024-09': 1.93, '2024-10': 1.89, '2024-11': 1.96, '2024-12': 1.91,
-                    '2025-01': 1.94, '2025-02': 1.88, '2025-03': 1.97, '2025-04': 1.92,
-                    '2025-05': 1.99, '2025-06': 1.85, '2025-07': 1.93
-                };
+                console.error('Dividend error:', error);
             }
+            return { '2024-01': 1.85, '2024-02': 1.92, '2024-03': 1.78, '2024-04': 1.88, '2024-05': 1.95, '2024-06': 1.82, '2024-07': 1.90, '2024-08': 1.87, '2024-09': 1.93, '2024-10': 1.89, '2024-11': 1.96, '2024-12': 1.91, '2025-01': 1.94, '2025-02': 1.88, '2025-03': 1.97, '2025-04': 1.92, '2025-05': 1.99, '2025-06': 1.85, '2025-07': 1.93 };
         }
-        
-        // ===== NEW BUTTON FUNCTIONS =====
-        
+
+        // ===== BUTTON FUNCTIONS =====
         async function autoFillBitcoin() {
             const date = new Date(document.getElementById('purchaseDate').value);
             const mstyPrice = document.getElementById('mstyPrice').value;
-            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
-            const goBtn = document.getElementById('mstyGoBtn');
+            const bitcoinInput = document.getElementById('bitcoinPrice');
+            const btn = document.getElementById('mstyGoBtn');
             
-            if (!mstyPrice) {
-                alert('Please enter MSTY price first');
-                return;
-            }
+            if (!mstyPrice) { alert('Please enter MSTY price first'); return; }
             
-            goBtn.disabled = true;
-            goBtn.textContent = 'Loading...';
-            bitcoinPriceInput.placeholder = 'Fetching Bitcoin price...';
-            
-            try {
-                const bitcoinHistPrice = await getBitcoinHistoricalPrice(date);
-                if (bitcoinHistPrice) {
-                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
-                    bitcoinPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
-                } else {
-                    bitcoinPriceInput.placeholder = 'Could not fetch price for this date';
-                }
-            } catch (error) {
-                bitcoinPriceInput.placeholder = 'Error fetching price';
-            } finally {
-                goBtn.disabled = false;
-                goBtn.textContent = 'Go';
-            }
+            btn.disabled = true; btn.textContent = 'Loading...';
+            const price = await getBitcoinHistoricalPrice(date);
+            if (price) bitcoinInput.value = price.toFixed(2);
+            btn.disabled = false; btn.textContent = 'Go';
         }
-        
+
         async function autoFillMSTY() {
             const date = new Date(document.getElementById('purchaseDate').value);
             const bitcoinPrice = document.getElementById('bitcoinPrice').value;
-            const mstyPriceInput = document.getElementById('mstyPrice');
-            const goBtn = document.getElementById('bitcoinGoBtn');
+            const mstyInput = document.getElementById('mstyPrice');
+            const btn = document.getElementById('bitcoinGoBtn');
             
-            if (!bitcoinPrice) {
-                alert('Please enter Bitcoin price first');
-                return;
-            }
+            if (!bitcoinPrice) { alert('Please enter Bitcoin price first'); return; }
             
-            goBtn.disabled = true;
-            goBtn.textContent = 'Loading...';
-            mstyPriceInput.placeholder = 'Fetching MSTY price...';
-            
-            try {
-                const mstyHistPrice = await getMSTYHistoricalPrice(date);
-                if (mstyHistPrice) {
-                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
-                    mstyPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
-                } else {
-                    mstyPriceInput.placeholder = 'Could not fetch price for this date';
-                }
-            } catch (error) {
-                mstyPriceInput.placeholder = 'Error fetching price';
-            } finally {
-                goBtn.disabled = false;
-                goBtn.textContent = 'Go';
-            }
+            btn.disabled = true; btn.textContent = 'Loading...';
+            const price = await getMSTYHistoricalPrice(date);
+            if (price) mstyInput.value = price.toFixed(2);
+            btn.disabled = false; btn.textContent = 'Go';
         }
-        
+
         async function justCurious() {
             const date = new Date(document.getElementById('purchaseDate').value);
-            const mstyPriceInput = document.getElementById('mstyPrice');
-            const bitcoinPriceInput = document.getElementById('bitcoinPrice');
-            const curiousBtn = document.getElementById('curiousBtn');
+            const btn = document.getElementById('curiousBtn');
             
-            curiousBtn.disabled = true;
-            curiousBtn.textContent = 'Loading...';
-            mstyPriceInput.placeholder = 'Fetching MSTY price...';
-            bitcoinPriceInput.placeholder = 'Fetching Bitcoin price...';
-            
-            try {
-                const [mstyHistPrice, bitcoinHistPrice] = await Promise.all([
-                    getMSTYHistoricalPrice(date),
-                    getBitcoinHistoricalPrice(date)
-                ]);
-                
-                if (mstyHistPrice) {
-                    mstyPriceInput.value = mstyHistPrice.toFixed(2);
-                    mstyPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
-                } else {
-                    mstyPriceInput.placeholder = 'Could not fetch MSTY price';
-                }
-                
-                if (bitcoinHistPrice) {
-                    bitcoinPriceInput.value = bitcoinHistPrice.toFixed(2);
-                    bitcoinPriceInput.placeholder = `Auto-filled for ${date.toLocaleDateString()}`;
-                } else {
-                    bitcoinPriceInput.placeholder = 'Could not fetch Bitcoin price';
-                }
-            } catch (error) {
-                console.error('Error in justCurious:', error);
-                mstyPriceInput.placeholder = 'Error fetching prices';
-                bitcoinPriceInput.placeholder = 'Error fetching prices';
-            } finally {
-                curiousBtn.disabled = false;
-                curiousBtn.textContent = 'Just Curious';
-            }
+            btn.disabled = true; btn.textContent = 'Loading...';
+            const [mstyPrice, bitcoinPrice] = await Promise.all([getMSTYHistoricalPrice(date), getBitcoinHistoricalPrice(date)]);
+            if (mstyPrice) document.getElementById('mstyPrice').value = mstyPrice.toFixed(2);
+            if (bitcoinPrice) document.getElementById('bitcoinPrice').value = bitcoinPrice.toFixed(2);
+            btn.disabled = false; btn.textContent = 'Just Curious';
         }
-        
-        // ===== UTILITY FUNCTIONS =====
-        
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount);
-        }
-        
-        function formatPercentage(percent) {
-            return percent.toFixed(2) + '%';
-        }
-        
+
+        // ===== CALCULATION =====
+        function formatCurrency(amount) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount); }
+        function formatPercentage(percent) { return percent.toFixed(2) + '%'; }
+
         function calculateDividends(purchaseDate, shares, dividendData) {
             const currentDate = new Date();
             let totalDividends = 0;
-            
             let date = new Date(purchaseDate);
             date.setMonth(date.getMonth() + 1);
             date.setDate(1);
             
             while (date <= currentDate) {
                 const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
-                if (dividendData[monthKey]) {
-                    totalDividends += dividendData[monthKey] * shares;
-                }
+                if (dividendData[monthKey]) totalDividends += dividendData[monthKey] * shares;
                 date.setMonth(date.getMonth() + 1);
             }
-            
             return totalDividends;
         }
-        
+
         function getDividendHistory(purchaseDate, dividendData) {
             const currentDate = new Date();
             let history = [];
-            
             let date = new Date(purchaseDate);
             date.setMonth(date.getMonth() + 1);
             date.setDate(1);
@@ -816,40 +314,26 @@
                 }
                 date.setMonth(date.getMonth() + 1);
             }
-            
             return history.join(' • ') || 'No dividends in selected period';
         }
-        
-        // ===== MAIN CALCULATION FUNCTION =====
-        
+
         async function calculateReturns() {
             const button = document.getElementById('calculateBtn');
             const resultsDiv = document.getElementById('results');
-            
-            // Validate inputs
             const mstyPrice = parseFloat(document.getElementById('mstyPrice').value);
             const bitcoinPrice = parseFloat(document.getElementById('bitcoinPrice').value);
             
-            if (!mstyPrice || !bitcoinPrice) {
-                alert('Please fill in both MSTY and Bitcoin prices. Use the "Go" buttons or "Just Curious" to auto-fill missing prices.');
-                return;
-            }
+            if (!mstyPrice || !bitcoinPrice) { alert('Please fill in both prices. Use "Go" buttons or "Just Curious" to auto-fill.'); return; }
             
-            // Show loading state
-            button.disabled = true;
-            button.textContent = 'Calculating...';
-            resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Fetching data and calculating returns...</div>';
+            button.disabled = true; button.textContent = 'Calculating...';
+            resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Calculating returns...</div>';
             resultsDiv.style.display = 'block';
             
             try {
-                // Get input values
                 const purchaseDate = new Date(document.getElementById('purchaseDate').value);
                 const investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
-                
-                // Get dividend data
                 const dividendData = await getMSTYDividends();
                 
-                // Calculate MSTY investment
                 const mstyShares = investmentAmount / mstyPrice;
                 const mstyCurrentValue = mstyShares * currentMSTYPrice;
                 const totalDividends = calculateDividends(purchaseDate, mstyShares, dividendData);
@@ -857,38 +341,67 @@
                 const mstyProfit = mstyTotalReturn - investmentAmount;
                 const mstyReturnPercent = (mstyProfit / investmentAmount) * 100;
                 
-                // Calculate Bitcoin investment
                 const bitcoinAmount = investmentAmount / bitcoinPrice;
                 const bitcoinCurrentValue = bitcoinAmount * currentBitcoinPrice;
                 const bitcoinProfit = bitcoinCurrentValue - investmentAmount;
                 const bitcoinReturnPercent = (bitcoinProfit / investmentAmount) * 100;
                 
-                // Display results
-                displayResults({
-                    msty: {
-                        shares: mstyShares,
-                        currentValue: mstyCurrentValue,
-                        dividends: totalDividends,
-                        totalReturn: mstyTotalReturn,
-                        profit: mstyProfit,
-                        returnPercent: mstyReturnPercent
-                    },
-                    bitcoin: {
-                        amount: bitcoinAmount,
-                        currentValue: bitcoinCurrentValue,
-                        profit: bitcoinProfit,
-                        returnPercent: bitcoinReturnPercent
-                    },
-                    dividendHistory: getDividendHistory(purchaseDate, dividendData)
-                });
+                const winner = mstyTotalReturn > bitcoinCurrentValue ? 'MSTY' : 'Bitcoin';
+                const difference = Math.abs(mstyTotalReturn - bitcoinCurrentValue);
                 
+                resultsDiv.innerHTML = `
+                    <div class="investment-card">
+                        <div class="investment-title">MSTY Investment</div>
+                        <div class="metric"><span class="metric-label">Shares:</span><span class="metric-value">${mstyShares.toFixed(2)}</span></div>
+                        <div class="metric"><span class="metric-label">Current Value:</span><span class="metric-value">${formatCurrency(mstyCurrentValue)}</span></div>
+                        <div class="metric"><span class="metric-label">Dividends:</span><span class="metric-value">${formatCurrency(totalDividends)}</span></div>
+                        <div class="metric"><span class="metric-label">Total Return:</span><span class="metric-value">${formatCurrency(mstyTotalReturn)}</span></div>
+                        <div class="metric"><span class="metric-label">Profit/Loss:</span><span class="metric-value ${mstyProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(mstyProfit)}</span></div>
+                        <div class="metric"><span class="metric-label">Return %:</span><span class="metric-value ${mstyReturnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(mstyReturnPercent)}</span></div>
+                        <div class="dividend-info"><div class="dividend-title">Recent Dividends</div><div class="dividend-details">${getDividendHistory(purchaseDate, dividendData)}</div></div>
+                    </div>
+                    <div class="investment-card">
+                        <div class="investment-title">Bitcoin Investment</div>
+                        <div class="metric"><span class="metric-label">Bitcoin:</span><span class="metric-value">${bitcoinAmount.toFixed(6)} BTC</span></div>
+                        <div class="metric"><span class="metric-label">Current Value:</span><span class="metric-value">${formatCurrency(bitcoinCurrentValue)}</span></div>
+                        <div class="metric"><span class="metric-label">Profit/Loss:</span><span class="metric-value ${bitcoinProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(bitcoinProfit)}</span></div>
+                        <div class="metric"><span class="metric-label">Return %:</span><span class="metric-value ${bitcoinReturnPercent >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPercentage(bitcoinReturnPercent)}</span></div>
+                    </div>
+                    <div class="comparison-section">
+                        <div class="comparison-title">Investment Comparison</div>
+                        <div class="winner">${winner} Wins!</div>
+                        <div style="margin-top: 15px; font-size: 1.1rem;">${winner} performed better by ${formatCurrency(difference)} (${Math.abs(mstyReturnPercent - bitcoinReturnPercent).toFixed(2)}% difference)</div>
+                    </div>
+                `;
             } catch (error) {
-                console.error('Calculation error:', error);
-                resultsDiv.innerHTML = `<div class="error">Error calculating returns: ${error.message}</div>`;
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
             } finally {
-                button.disabled = false;
-                button.textContent = 'Calculate Returns';
+                button.disabled = false; button.textContent = 'Calculate Returns';
             }
         }
-        
-        function displayResults(data
+
+        async function loadCurrentPrices() {
+            try {
+                currentMSTYPrice = await getMSTYCurrentPrice();
+                document.getElementById('mstyCurrentPrice').textContent = formatCurrency(currentMSTYPrice);
+                
+                const bitcoinData = await getBitcoinCurrentPrice();
+                currentBitcoinPrice = bitcoinData.price;
+                document.getElementById('bitcoinCurrentPrice').textContent = formatCurrency(currentBitcoinPrice);
+                
+                const changeClass = bitcoinData.change >= 0 ? 'profit-positive' : 'profit-negative';
+                const changeSign = bitcoinData.change >= 0 ? '+' : '';
+                document.getElementById('bitcoinChange').textContent = `${changeSign}${bitcoinData.change.toFixed(2)}% today`;
+                document.getElementById('bitcoinChange').className = `price-change ${changeClass}`;
+            } catch (error) {
+                console.error('Error loading prices:', error);
+                document.getElementById('mstyCurrentPrice').textContent = 'Error';
+                document.getElementById('bitcoinCurrentPrice').textContent = 'Error';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', loadCurrentPrices);
+    </script>
+</body>
+</html>
